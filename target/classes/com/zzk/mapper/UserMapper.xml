@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zzk.mapper.UserMapper">
+    <cache/>
+
+    <!--完成实体类与表列明的映射(实际上开启了驼峰名自动映射,可不写)-->
+    <resultMap id="userMap" type="user" autoMapping="true">
+        <id property="userId" column="user_id"/>
+        <result property="cardType" column="card_type"/>
+        <result property="cardNo" column="card_no"/>
+        <result property="userName" column="user_name"/>
+        <result property="userSex" column="user_sex"/>
+        <result property="userAge" column="user_age"/>
+        <result property="userRole" column="user_role"/>
+    </resultMap>
+
+    <!--定义全部列名和属性名,方便引用-->
+    <sql id="allColumn">
+        user_id,card_type,card_no,user_name,user_sex,user_age,user_role
+    </sql>
+    <sql id="allProperty">
+        #{userId},#{cardType},#{cardNo},#{userName},#{userSex},#{userAge},#{userRole}
+    </sql>
+
+    <!--用于给<set/>提供判断,以实现动态修改(不想修改的地方直接传null,而不用赋予重复的值)-->
+    <sql id="if">
+        <if test="userId!=null and userId!=''">card_type=#{userId},</if>
+        <if test="cardType!=null and cardType>=0.0">card_no=#{cardType},</if>
+        <if test="cardNo!=null and cardNo!=''">user_name=#{cardNo},</if>
+        <if test="userSex!=null and userSex!=''">user_sex=#{userSex},</if>
+        <if test="userAge!=null and userAge!=''">user_age=#{userAge},</if>
+        <if test="userRole!=null and userRole!=''">user_role=#{userRole},</if>
+    </sql>
+
+
+    <select id="selectUserPage" resultMap="userMap">
+        select
+            <include refid="allColumn"/>
+        from
+            user
+        <where>
+            <if test="userName!=null and userName!=''">
+                and user_name like "%"#{userName}"%"
+            </if>
+            <if test="userSex!=null and userSex!=''">
+                and user_sex = #{userSex}
+            </if>
+        </where>
+        limit #{startRow},5
+    </select>
+
+    <!--
+        主键回显,自动生成的主键值会被封装回对象对应的属性中
+        useGeneratedKeys="true"  表示t_car表使用自动生成的主键值
+        keyProperty="id"  指定自动生成的主键值赋值给pojo类的哪个属性(这里为将自动生成的t_car表的主键id赋值给Car对象的id属性)
+    -->
+    <insert id="createUser" useGeneratedKeys="true" keyProperty="userId">
+        insert into user(<include refid="allColumn"/>) values (<include refid="allProperty"/>)
+    </insert>
+
+
+    <delete id="deleteUserById">
+        delete from user where user_id=#{userId}
+    </delete>
+
+    <select id="getRowCount" resultType="int">
+        select count(*) from user
+        <where>
+            <if test="userName!=null and userName!=''">
+                user_name like concat('%',#{userName},'%')
+            </if>
+            <if test="userSex!=null and userSex!=''">
+                and user_sex=#{userSex}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateUserById" parameterType="user">
+        <!--采用<set/>+<if/>实现动态修改.  如果传过来的为null,则会该null不会值覆盖原数据-->
+        update user
+        <set>
+            <include refid="if"/>
+        </set>
+        <where>
+            <if test="userId!=null and userId!=''">
+                user_id=#{userId}
+            </if>
+        </where>
+
+        <!--静态修改.  如果传过来的为null,则会使用该null值覆盖原数据-->
+        <!--update user set
+            card_type=#{cardType},card_no=#{cardNo},user_name=#{userName},user_sex=#{userSex},user_age=#{userAge},user_role=#{userRole}
+        where
+            user_id=#{userId}-->
+    </update>
+
+</mapper>

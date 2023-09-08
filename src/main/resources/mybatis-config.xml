@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <!--开启半驼峰命名自动映射机制-->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!--开启懒加载/延迟加载机制-->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!--开启全局使用DQL语句的二级缓存机制(默认为true,可不写,特殊需要可将其改为false)-->
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+
+</configuration>
